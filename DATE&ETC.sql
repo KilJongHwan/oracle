@@ -148,3 +148,94 @@ SELECT SAL,
     TO_CHAR(SAL,'000999999.99') AS sal_3,
     TO_CHAR(SAL,'999,999,99') AS sal_4
 FROM EMP;
+
+-- TO_NUMBER() : NUMBER 타입으로 형 변환
+SELECT TO_NUMBER('1300') - '1500'
+FROM DUAL;
+
+-- TO_DATE() : 문자열로 명시된 날짜를 날짜 타입으로 형 변환
+SELECT TO_DATE('2022/08/20', 'YY/MM/DD')
+FROM DUAL;
+
+-- 1981년 6월 1일 이후에 입사한 사원 정보 출력하기
+SELECT *
+FROM EMP
+WHERE HIREDATE > TO_DATE('1981/06/01','YYYY/MM/DD');
+
+-- NULL 처리 함수 : NULL운 값이 없음, 즉 할당되지 않음을 의미
+-- NULL은 0이나 공백과는 다른 의미, 연산 불가
+-- NVL(NULL인지 검사할 열, 앞의 열 데이터가 NULL인 경우 반환할 데이터)
+SELECT EMPNO, ENAME, SAL, COMM, SAL+COMM,
+    NVL(COMM, 0), SAL + NVL(COMM, 0)
+FROM EMP;
+
+-- NVL2() : NULL이 아닌경우와 NULL인 경우 모두에 대해서 값을 지정 가능하다.
+SELECT EMPNO, ENAME, COMM, SAL,
+    NVL2(COMM,'O','X') AS 성과급유무,
+    NVL2(COMM,SAL*12+COMM,SAL*12) AS 연봉
+FROM EMP;
+
+-- NULLIF() : 두 값이 동일하면 NULL 반환, 아니면 첫 번째 값 반환
+SELECT NULLIF(10,10), NULLIF('A','B')
+FROM DUAL;
+
+-- DECODE : 주어진 데이터 값이 조건값과 일치하는 값 출력
+-- 일치하는 값이 없으면 기본값 출력
+SELECT EMPNO, ENAME, JOB, SAL,
+    DECODE(JOB,
+            'MANAGER' , SAL * 1.1,
+            'SALESMAN', SAL * 1.05,
+            'ANALYIST', SAL,
+            SAL*1.03) AS 연봉인상
+FROM EMP;
+
+-- CASE 문
+SELECT EMPNO, ENAME, JOB, SAL,
+    CASE JOB
+        WHEN 'MANAGER' THEN SAL * 1.1
+        WHEN 'SALESMAN' THEN SAL * 1.05
+        WHEN 'ANALYST' THEN SAL
+        ELSE SAL * 1.03
+    END AS "연봉인상"
+FROM EMP;
+
+-- 열 값에 따라서 출력 값이 달라지는 CASE 문
+SELECT EMPNO, ENAME,
+    CASE
+        WHEN COMM IS NULL THEN '해당사항 없음'
+        WHEN COMM = 0 THEN '수당 없음'
+        WHEN COMM > 0 THEN '수당 : ' || COMM
+    END AS "성과급 기준"
+FROM EMP;
+
+-- 1번
+SELECT EMPNO,
+    RPAD(SUBSTR(EMPNO, 1, 2),4,'*') AS MASKING_EMPNO, ENAME,
+    RPAD(SUBSTR(ENAME, 1, 1),LENGTH(ENAME),'*') AS MASKING_ENAME
+FROM EMP
+WHERE LENGTH(ENAME) >= 5 AND LENGTH(ENAME) < 6;
+
+-- 2번
+SELECT EMPNO, ENAME, SAL,
+    TRUNC(SAL / 21.5, 2) AS 일급,
+    ROUND((SAL / 21.5)/ 8, 1) AS 시급
+FROM EMP;
+
+-- 3번
+-- NEXT_DAY(기준일자, 찾을 요일) : 기준일자 다음에 오는 날짜를 구하는 함수 
+SELECT EMPNO, ENAME, HIREDATE,
+    TO_CHAR(NEXT_DAY(ADD_MONTHS(HIREDATE, 3), 'MON'), 'YYYY/MM/DD') AS 정직원진급,
+    NVL(TO_CHAR(COMM), 'N/A') AS COMM
+FROM EMP;
+
+-- 4번
+SELECT EMPNO, ENAME, MGR, 
+    CASE
+        WHEN MGR IS NULL THEN '0000'
+        WHEN SUBSTR(MGR, 1, 2) = '78' THEN '8888'
+        WHEN SUBSTR(MGR, 1, 2) = '77' THEN '7777'
+        WHEN SUBSTR(MGR, 1, 2) = '76' THEN '6666'
+        WHEN SUBSTR(MGR, 1, 2) = '75' THEN '5555'
+        else TO_CHAR(MGR)
+    END AS CHG_MGR
+FROM EMP;
