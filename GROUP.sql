@@ -175,3 +175,45 @@ SELECT *
     WHERE E.DEPTNO = D.DEPTNO
     AND SAL <= 2500 AND EMPNO <= 9999
     ORDER BY EMPNO;
+
+-- 비등가 조인 : 동일 Column(열, field)없이 다른 조건을 사용하여 조인 할 때 사용 (일반적인 경우는 아님)
+SELECT * FROM EMP;
+SELECT * FROM SALGRADE;
+
+SELECT E.ENAME, E.SAL, S.GRADE
+FROM EMP E, SALGRADE S  -- 두 개의 테이블을 연결
+WHERE E.SAL BETWEEN S.LOSAL AND S.HISAL;    -- 비등가 조인
+
+--ANSI 조인으로 변경
+SELECT ENAME, SAL, GRADE
+FROM EMP E JOIN SALGRADE S
+ON SAL BETWEEN S.LOSAL AND S.HISAL;
+
+-- 자체 조인 : SELF 조인, 같은 테이블을 두 번 사용하여 자체 조인
+-- EMP 테이블에서 직속 상관의 사원번호는 MGR에 있음
+-- MGR을 이용해서 상관의 이름을 알아내기 위해서 사용할 수 있음
+SELECT E1.EMPNO, E1.ENAME, E1.MGR,
+    E2.EMPNO AS MGR_EMPNO, E2.ENAME AS MGR_ENAME
+    FROM EMP E1 , EMP E2
+WHERE E1.MGR = E2.EMPNO;
+
+-- 외부 조인 : 동등 조인의 경우 한쪽의 Column이 없으면 해당 행으로 표시되지 않음
+-- 외부 조인은 내부조인과 다르게 다른 한쪽에 값이 없어도 출력
+-- 외부 조인은 동등 조인 조건을 만족하지 못해 누락되는 행을 출력하기 위해 사용
+
+INSERT INTO EMP(EMPNO ,ENAME ,JOB ,MGR ,HIREDATE ,SAL ,COMM ,DEPTNO)
+    VALUES(9000,'ALIICE','SALESMAN',7698,SYSDATE,2000,1000,NULL);
+
+-- 왼쪽 외부 조인 사용하기
+SELECT ENAME, E.DEPTNO, DNAME
+FROM EMP E, DEPT D
+WHERE E.DEPTNO = D.DEPTNO(+)
+ORDER BY E.DEPTNO;
+
+-- 오른쪽 외부 조인 사용하기
+SELECT E.ENAME, D.DEPTNO, D.DNAME
+FROM EMP E , DEPT D
+WHERE E.DEPTNO(+) = D.DEPTNO
+ORDER BY E.DEPTNO;
+
+-- SQL-99 표준뮨법으로 배우는 ANSI 조인
