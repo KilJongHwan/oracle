@@ -1,0 +1,84 @@
+-- MembersID 시퀀스 생성
+CREATE SEQUENCE MembersID_seq START WITH 1 INCREMENT BY 1;
+
+-- 테이블 생성
+CREATE TABLE Members (
+    MembersID INT PRIMARY KEY,
+    Password VARCHAR2(255) NOT NULL,
+    Name VARCHAR2(255) NOT NULL
+);
+
+
+-- 트리거 생성
+CREATE OR REPLACE TRIGGER MembersID_trigger
+BEFORE INSERT ON Members
+FOR EACH ROW
+BEGIN
+    SELECT MembersID_seq.NEXTVAL INTO :NEW.MembersID FROM DUAL;
+END;
+
+-- PostsID 시퀀스 생성
+CREATE SEQUENCE PostsID_seq START WITH 1 INCREMENT BY 1;
+
+
+-- 테이블 생성
+CREATE TABLE Posts (
+    PostsID NUMBER(10) PRIMARY KEY,
+    Title VARCHAR2(255) NOT NULL,
+    CurrTime TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    Content CLOB,
+    MembersID NUMBER(10),
+    LikesCounts NUMBER(5) DEFAULT 0,
+    CONSTRAINT fk_Posts_Members FOREIGN KEY (MembersID) REFERENCES Members(MembersID)
+);
+
+
+-- 트리거 생성
+CREATE OR REPLACE TRIGGER Posts_trigger
+BEFORE INSERT ON Posts
+FOR EACH ROW
+BEGIN
+    SELECT PostsID_seq.NEXTVAL INTO :NEW.PostsID FROM DUAL;
+END;
+
+-- LikesID 시퀀스 생성
+CREATE SEQUENCE LikesID_seq START WITH 1 INCREMENT BY 1;
+
+-- Likes 테이블 생성
+CREATE TABLE Likes (
+    LikesID NUMBER(10) PRIMARY KEY,
+    PostsID NUMBER(10) NOT NULL,
+    MembersID NUMBER(10) NOT NULL,
+    CONSTRAINT fk_Likes_Posts FOREIGN KEY (PostsID) REFERENCES Posts(PostsID),
+    CONSTRAINT fk_Likes_Members FOREIGN KEY (MembersID) REFERENCES Members(MembersID)
+);
+
+-- 트리거 생성
+CREATE OR REPLACE TRIGGER Likes_trigger
+BEFORE INSERT ON Likes
+FOR EACH ROW
+BEGIN
+    SELECT LikesID_seq.NEXTVAL INTO :NEW.LikesID FROM DUAL;
+END;
+
+-- Comments 테이블 생성
+CREATE TABLE Comments (
+    CommentsID NUMBER(10) PRIMARY KEY,
+    PostsID NUMBER(10),
+    MembersID NUMBER(10),
+    CommentsText CLOB,
+    CommentsTime TIMESTAMP DEFAULT SYSTIMESTAMP,
+    CONSTRAINT fk_Comments_Posts FOREIGN KEY (PostsID) REFERENCES Posts(PostsID),
+    CONSTRAINT fk_Comments_Members FOREIGN KEY (MembersID) REFERENCES Members(MembersID)
+);
+
+-- CommentsID 시퀀스 생성
+CREATE SEQUENCE CommentsID_seq START WITH 1 INCREMENT BY 1;
+
+-- 트리거 생성
+CREATE OR REPLACE TRIGGER Comments_trigger
+BEFORE INSERT ON Comments
+FOR EACH ROW
+BEGIN
+    SELECT CommentsID_seq.NEXTVAL INTO :NEW.CommentsID FROM DUAL;
+END;
