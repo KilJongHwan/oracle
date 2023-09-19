@@ -169,3 +169,18 @@ AND E10.JOB NOT IN (SELECT DISTINCT JOB FROM EMP WHERE DEPTNO = 30);
 -- 4번 직책이 SALESMAN인 사람들의 최고 급여보다 높은 급여를 받는 사원들의 사원 정보,
 -- 급여 등급 정보를 다음과 같이 출력하는 SQL문을 작성하세요
 -- (단 서브쿼리를 활용할 때 다중행 함수를 사용하는 방법과 사용하지 않는 방법을 통해 사원 번호를 기준으로 오름차순으로 정렬하세요).
+SELECT E.EMPNO,E.ENAME,E.SAL,S.GRADE
+FROM EMP E JOIN SALGRADE S
+ON E.SAL BETWEEN S.LOSAL AND S.HISAL
+WHERE E.SAL > (SELECT MAX(SAL)
+               FROM EMP
+               WHERE JOB = 'SALESMAN')
+ORDER BY E.EMPNO;
+-- 다중행을 사용해서 풀기
+SELECT E.EMPNO,E.ENAME,E.SAL,S.GRADE
+FROM EMP E JOIN SALGRADE S
+ON E.SAL BETWEEN S.LOSAL AND S.HISAL
+WHERE E.SAL > ALL(SELECT SAL
+                  FROM EMP
+                  WHERE JOB = 'SALESMAN')
+ORDER BY E.EMPNO;
